@@ -481,7 +481,7 @@ function render() {
             ctx.restore();
         };
         
-        drawDeadBird(centerX - 70, centerY, 35, '#1e293b'); // Crow
+        drawDeadBird(centerX - 70, centerY, 35, '#ef4444'); // 赤色に変更
         drawDeadBird(centerX + 70, centerY, 25, '#d6d3d1'); // Sparrow
     }
     
