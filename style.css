@@ -122,3 +122,36 @@ button:hover {
 button:active {
     transform: translateY(2px) scale(0.95);
 }
+
+.button-group {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+#credits-btn {
+    background: linear-gradient(90deg, #64748b, #94a3b8);
+    box-shadow: 0 10px 25px rgba(100, 116, 139, 0.4);
+}
+
+#credits-btn:hover {
+    box-shadow: 0 15px 30px rgba(100, 116, 139, 0.6);
+}
+
+.credit-text {
+    position: absolute;
+    bottom: 20px;
+    font-size: 14px;
+    color: #64748b;
+    letter-spacing: 1px;
+}
+
+#credits-screen p {
+    text-align: center;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+#credits-screen strong {
+    color: #cbd5e1;
+}

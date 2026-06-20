@@ -29,9 +29,12 @@ const scoreValue = document.getElementById('score-value');
 const scoreDisplay = document.getElementById('score-display');
 const titleScreen = document.getElementById('title-screen');
 const gameOverScreen = document.getElementById('game-over-screen');
+const creditsScreen = document.getElementById('credits-screen');
 const finalScore = document.getElementById('final-score');
 const startBtn = document.getElementById('start-btn');
 const retryBtn = document.getElementById('retry-btn');
+const creditsBtn = document.getElementById('credits-btn');
+const backBtn = document.getElementById('back-btn');
 const container = document.getElementById('game-container');
 
 // Input
@@ -57,9 +60,21 @@ function init() {
     // Buttons
     startBtn.addEventListener('click', startGame);
     retryBtn.addEventListener('click', startGame);
+    creditsBtn.addEventListener('click', showCredits);
+    backBtn.addEventListener('click', hideCredits);
     
     // Start custom render loop
     requestAnimationFrame(render);
+}
+
+function showCredits() {
+    titleScreen.classList.add('hidden');
+    creditsScreen.classList.remove('hidden');
+}
+
+function hideCredits() {
+    creditsScreen.classList.add('hidden');
+    titleScreen.classList.remove('hidden');
 }
 
 function resize() {
