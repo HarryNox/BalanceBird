@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>バランス・バード ～手と割り箸の協奏曲～</title>
+    <!-- Google Fonts for Japanese text -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sawarabi+Mincho&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Matter.js Canvas will be appended here -->
+        
+        <!-- UI Layer -->
+        <div id="ui-layer">
+            <div id="score-container" class="hidden">
+                <span id="score-label">弐阡弐拾参</span><span id="score-value">0</span> 点
+            </div>
+
+            <div id="title-screen" class="screen">
+                <h1 class="title">バランス・バード</h1>
+                <p class="subtitle">～手と割り箸の協奏曲～</p>
+                <div class="instructions">
+                    <p>指やマウスを左右に動かして、割り箸のバランスを保ちましょう。</p>
+                    <p>予測不能な鳥の重みに耐え、長く堪え忍ぶのです。</p>
+                </div>
+                <button id="start-btn" class="btn">いざ、尋常に</button>
+            </div>
+
+            <div id="game-over-screen" class="screen hidden">
+                <h1 class="title">無念</h1>
+                <p class="result-text">記録: <span id="final-score">0</span> 点</p>
+                <button id="retry-btn" class="btn">もう一度</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Matter.js Physics Engine (CDN) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>
