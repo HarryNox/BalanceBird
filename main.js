@@ -13,6 +13,10 @@ let spawnTimer;
 let currentScreen = 'title'; // 'title', 'playing', 'gameover', 'credits'
 let bgBirds = [];
 
+// Audio objects (ファイル名は仮置きです。用意したファイル名に合わせて変更してください)
+const startSound = new Audio('start.mp3');
+const gameOverSound = new Audio('gameover.mp3');
+
 // Game Objects
 let hand;
 let stick;
@@ -130,6 +134,10 @@ function startGame() {
     isPlaying = true;
     score = 0;
     scoreValue.innerText = '0';
+    
+    // Play Start Sound
+    startSound.currentTime = 0;
+    startSound.play().catch(e => console.log("Audio play failed, user might not have interacted yet", e));
     
     // Clear old bird timers to prevent score carryover
     birds.forEach(b => clearTimeout(b.timer));
@@ -266,6 +274,10 @@ function gameOver() {
     currentScreen = 'gameover';
     clearInterval(scoreTimer);
     clearTimeout(spawnTimer);
+    
+    // Play Game Over Sound
+    gameOverSound.currentTime = 0;
+    gameOverSound.play().catch(e => console.log("Audio play failed", e));
     
     finalScore.innerText = score;
     gameOverScreen.classList.remove('hidden');
