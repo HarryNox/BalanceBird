@@ -10,6 +10,8 @@ let isPlaying = false;
 let score = 0;
 let scoreTimer;
 let spawnTimer;
+let currentScreen = 'title'; // 'title', 'playing', 'gameover', 'credits'
+let bgBirds = [];
 
 // Game Objects
 let hand;
@@ -33,6 +35,7 @@ const creditsScreen = document.getElementById('credits-screen');
 const finalScore = document.getElementById('final-score');
 const startBtn = document.getElementById('start-btn');
 const retryBtn = document.getElementById('retry-btn');
+const titleBtn = document.getElementById('title-btn');
 const creditsBtn = document.getElementById('credits-btn');
 const backBtn = document.getElementById('back-btn');
 const container = document.getElementById('game-container');
@@ -60,21 +63,47 @@ function init() {
     // Buttons
     startBtn.addEventListener('click', startGame);
     retryBtn.addEventListener('click', startGame);
+    titleBtn.addEventListener('click', backToTitle);
     creditsBtn.addEventListener('click', showCredits);
     backBtn.addEventListener('click', hideCredits);
+    
+    // Generate background decorative birds
+    for(let i = 0; i < 25; i++) {
+        bgBirds.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            vx: (Math.random() - 0.5) * 1.5,
+            vy: (Math.random() - 0.5) * 1.5,
+            radius: Math.random() * 10 + 10,
+            color: ['#d6d3d1', '#94a3b8', '#1e293b', '#ef4444'][Math.floor(Math.random()*4)]
+        });
+    }
     
     // Start custom render loop
     requestAnimationFrame(render);
 }
 
 function showCredits() {
+    currentScreen = 'credits';
     titleScreen.classList.add('hidden');
     creditsScreen.classList.remove('hidden');
 }
 
 function hideCredits() {
+    currentScreen = 'title';
     creditsScreen.classList.add('hidden');
     titleScreen.classList.remove('hidden');
+}
+
+function backToTitle() {
+    currentScreen = 'title';
+    gameOverScreen.classList.add('hidden');
+    titleScreen.classList.remove('hidden');
+    World.clear(world);
+    Engine.clear(engine);
+    hand = null;
+    stick = null;
+    birds = [];
 }
 
 function resize() {
@@ -97,6 +126,7 @@ function onTouchMove(e) {
 }
 
 function startGame() {
+    currentScreen = 'playing';
     isPlaying = true;
     score = 0;
     scoreValue.innerText = '0';
@@ -233,6 +263,7 @@ function spawnBirdByType(type) {
 function gameOver() {
     if (!isPlaying) return;
     isPlaying = false;
+    currentScreen = 'gameover';
     clearInterval(scoreTimer);
     clearTimeout(spawnTimer);
     
@@ -356,6 +387,91 @@ function render() {
     
     // Clear Canvas
     ctx.clearRect(0, 0, width, height);
+    
+    // Render Decorative Birds for Title/Credits
+    if (currentScreen === 'title' || currentScreen === 'credits') {
+        bgBirds.forEach(b => {
+            b.x += b.vx;
+            b.y += b.vy;
+            if(b.x < -30) b.x = width + 30;
+            if(b.x > width + 30) b.x = -30;
+            if(b.y < -30) b.y = height + 30;
+            if(b.y > height + 30) b.y = -30;
+            
+            ctx.save();
+            ctx.translate(b.x, b.y);
+            ctx.fillStyle = b.color;
+            ctx.shadowColor = b.color;
+            ctx.shadowBlur = 10;
+            ctx.beginPath();
+            ctx.arc(0, 0, b.radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            const faceDir = b.vx > 0 ? 1 : -1;
+            
+            // Beak
+            ctx.fillStyle = '#fbbf24';
+            ctx.beginPath();
+            ctx.moveTo(faceDir * (b.radius - 2), -b.radius/4);
+            ctx.lineTo(faceDir * (b.radius + 8), -b.radius/4 + 4);
+            ctx.lineTo(faceDir * (b.radius - 2), -b.radius/4 + 8);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Eye
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(faceDir * (b.radius/2), -b.radius/3, 2, 0, Math.PI*2);
+            ctx.fill();
+            
+            ctx.restore();
+        });
+    }
+    
+    // Render Dead Birds for GameOver
+    if (currentScreen === 'gameover') {
+        const centerX = width / 2;
+        const centerY = height / 2 - 150; // テキストよりも上の位置に変更
+        
+        const drawDeadBird = (x, y, radius, color) => {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.fillStyle = color;
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 15;
+            ctx.beginPath();
+            ctx.arc(0, 0, radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Beak pointing up (lying on back)
+            ctx.fillStyle = '#fbbf24';
+            ctx.beginPath();
+            ctx.moveTo(-4, -radius + 2);
+            ctx.lineTo(0, -radius - 12);
+            ctx.lineTo(4, -radius + 2);
+            ctx.closePath();
+            ctx.fill();
+            
+            // X eyes
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            const drawX = (ex, ey) => {
+                ctx.beginPath();
+                ctx.moveTo(ex - 4, ey - 4);
+                ctx.lineTo(ex + 4, ey + 4);
+                ctx.moveTo(ex + 4, ey - 4);
+                ctx.lineTo(ex - 4, ey + 4);
+                ctx.stroke();
+            }
+            drawX(-8, -radius/2);
+            drawX(8, -radius/2);
+            
+            ctx.restore();
+        };
+        
+        drawDeadBird(centerX - 70, centerY, 35, '#1e293b'); // Crow
+        drawDeadBird(centerX + 70, centerY, 25, '#d6d3d1'); // Sparrow
+    }
     
     // Draw Hand
     if (hand) {
