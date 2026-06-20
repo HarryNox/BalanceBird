@@ -86,7 +86,7 @@ canvas {
     z-index: 20;
 }
 
-.screen.hidden, #score-display.hidden {
+.screen.hidden, #score-display.hidden, #countdown-display.hidden {
     opacity: 0;
     pointer-events: none;
 }
