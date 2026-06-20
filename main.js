@@ -71,14 +71,12 @@ function resize() {
 }
 
 function onMouseMove(e) {
-    if (!isPlaying) return;
     const rect = container.getBoundingClientRect();
     targetHandX = e.clientX - rect.left;
 }
 
 function onTouchMove(e) {
-    if (!isPlaying) return;
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
     const rect = container.getBoundingClientRect();
     targetHandX = e.touches[0].clientX - rect.left;
 }
@@ -87,6 +85,9 @@ function startGame() {
     isPlaying = true;
     score = 0;
     scoreValue.innerText = '0';
+    
+    // Clear old bird timers to prevent score carryover
+    birds.forEach(b => clearTimeout(b.timer));
     birds = [];
     
     // Hide screens
@@ -101,17 +102,20 @@ function startGame() {
     // Create Hand
     const handWidth = 100;
     const handHeight = 30;
-    hand = Bodies.rectangle(width / 2, height - 100, handWidth, handHeight, { 
+    const startX = targetHandX || (width / 2);
+    
+    hand = Bodies.rectangle(startX, height - 100, handWidth, handHeight, { 
         isStatic: true, // we will move it manually via Body.setPosition
-        friction: 0.8,
+        friction: 1.0,
         render: { fillStyle: '#38bdf8' }
     });
     
     // Create Stick
     const stickWidth = 15;
     const stickHeight = 400;
-    stick = Bodies.rectangle(width / 2, height - 100 - handHeight/2 - stickHeight/2, stickWidth, stickHeight, {
-        friction: 0.8,
+    stick = Bodies.rectangle(startX, height - 100 - handHeight/2 - stickHeight/2, stickWidth, stickHeight, {
+        friction: 1.0,
+        frictionStatic: Infinity,
         density: 0.001,
         render: { fillStyle: '#d97706' }
     });
@@ -343,13 +347,36 @@ function render() {
         ctx.save();
         ctx.translate(hand.position.x, hand.position.y);
         ctx.rotate(hand.angle);
-        ctx.fillStyle = hand.render.fillStyle || '#fff';
-        ctx.shadowColor = ctx.fillStyle;
-        ctx.shadowBlur = 15;
-        // Draw round rect for hand
+        
+        // Stylized cartoon hand (white glove)
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = 'rgba(255,255,255,0.3)';
+        ctx.shadowBlur = 10;
+        
+        // Base of glove
         ctx.beginPath();
-        ctx.roundRect(-50, -15, 100, 30, 15);
+        ctx.roundRect(-45, -5, 90, 20, 10);
         ctx.fill();
+        
+        // Fingers
+        for(let i=0; i<4; i++) {
+            ctx.beginPath();
+            ctx.roundRect(-40 + i*22, -15, 18, 20, 9);
+            ctx.fill();
+        }
+        
+        // Outline for style
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(-45, -5, 90, 20, 10);
+        ctx.stroke();
+        for(let i=0; i<4; i++) {
+            ctx.beginPath();
+            ctx.roundRect(-40 + i*22, -15, 18, 20, 9);
+            ctx.stroke();
+        }
+        
         ctx.restore();
     }
     
@@ -359,19 +386,28 @@ function render() {
         ctx.translate(stick.position.x, stick.position.y);
         ctx.rotate(stick.angle);
         
-        // Gradient for stick to look like wood
-        const grd = ctx.createLinearGradient(-7.5, 0, 7.5, 0);
-        grd.addColorStop(0, '#b45309');
-        grd.addColorStop(0.5, '#f59e0b');
-        grd.addColorStop(1, '#b45309');
-        
-        ctx.fillStyle = grd;
-        ctx.shadowColor = '#000';
-        ctx.shadowBlur = 10;
+        // Chopstick wood color
+        ctx.fillStyle = '#e5c088';
+        ctx.shadowColor = 'rgba(0,0,0,0.4)';
+        ctx.shadowBlur = 15;
         
         ctx.beginPath();
-        ctx.roundRect(-7.5, -200, 15, 400, 7.5);
+        // Tapered chopstick
+        ctx.moveTo(-5, -200);
+        ctx.lineTo(5, -200);
+        ctx.lineTo(7.5, 200);
+        ctx.lineTo(-7.5, 200);
+        ctx.closePath();
         ctx.fill();
+        
+        // Split line at the top
+        ctx.strokeStyle = '#cda260';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, -200);
+        ctx.lineTo(0, -100);
+        ctx.stroke();
+        
         ctx.restore();
     }
     
@@ -389,13 +425,22 @@ function render() {
         ctx.fill();
         
         // Draw eyes or beak for detail
-        ctx.fillStyle = '#000';
-        ctx.shadowBlur = 0;
-        ctx.beginPath();
-        // Simple beak based on side
         if (bird.state === 'flying_in' || bird.state === 'landed') {
-             const faceDir = bird.state === 'flying_in' ? (bird.x < stick?.position.x ? 1 : -1) : -bird.side;
-             ctx.arc(faceDir * (bird.config.radius/2), -bird.config.radius/4, 2, 0, Math.PI*2);
+             const faceDir = bird.state === 'flying_in' ? (bird.x < (stick ? stick.position.x : width/2) ? 1 : -1) : -bird.side;
+             
+             // Beak
+             ctx.fillStyle = '#fbbf24'; // Yellow beak
+             ctx.beginPath();
+             ctx.moveTo(faceDir * (bird.config.radius - 2), -bird.config.radius/4);
+             ctx.lineTo(faceDir * (bird.config.radius + 8), -bird.config.radius/4 + 4);
+             ctx.lineTo(faceDir * (bird.config.radius - 2), -bird.config.radius/4 + 8);
+             ctx.closePath();
+             ctx.fill();
+             
+             // Eye
+             ctx.fillStyle = '#000';
+             ctx.beginPath();
+             ctx.arc(faceDir * (bird.config.radius/2), -bird.config.radius/3, 2, 0, Math.PI*2);
              ctx.fill();
         }
         
