@@ -351,8 +351,8 @@ function updateGame() {
             const stickY = stick.position.y;
             const sAngle = stick.angle;
             
-            // Local offset on stick
-            const localX = 7.5 * bird.side;
+            // Local offset on stick (include bird radius so it sits on the edge)
+            const localX = (7.5 + bird.config.radius) * bird.side;
             const localY = bird.targetOffset;
             
             // Global target position
@@ -378,7 +378,7 @@ function updateGame() {
                 // Create constraint to attach to stick
                 bird.constraint = Constraint.create({
                     bodyA: stick,
-                    pointA: { x: localX + bird.config.radius * bird.side, y: localY },
+                    pointA: { x: localX, y: localY },
                     bodyB: bird.body,
                     pointB: { x: 0, y: 0 },
                     stiffness: 1,
