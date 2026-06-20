@@ -55,6 +55,20 @@ canvas {
     color: #f8fafc;
 }
 
+#countdown-display {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 150px;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 0 40px rgba(56, 189, 248, 0.9);
+    z-index: 30;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
 .screen {
     position: absolute;
     top: 0;

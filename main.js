@@ -7,9 +7,11 @@ let runner;
 let canvas, ctx;
 let width, height;
 let isPlaying = false;
+let isCountdown = false;
 let score = 0;
 let scoreTimer;
 let spawnTimer;
+let countdownInterval;
 let currentScreen = 'title'; // 'title', 'playing', 'gameover', 'credits'
 let bgBirds = [];
 
@@ -33,6 +35,7 @@ const BIRD_TYPES = {
 // DOM Elements
 const scoreValue = document.getElementById('score-value');
 const scoreDisplay = document.getElementById('score-display');
+const countdownDisplay = document.getElementById('countdown-display');
 const titleScreen = document.getElementById('title-screen');
 const gameOverScreen = document.getElementById('game-over-screen');
 const creditsScreen = document.getElementById('credits-screen');
@@ -131,7 +134,8 @@ function onTouchMove(e) {
 
 function startGame() {
     currentScreen = 'playing';
-    isPlaying = true;
+    isPlaying = false; // Countdown starts first
+    isCountdown = true;
     score = 0;
     scoreValue.innerText = '0';
     
@@ -139,14 +143,19 @@ function startGame() {
     startSound.currentTime = 0;
     startSound.play().catch(e => console.log("Audio play failed, user might not have interacted yet", e));
     
-    // Clear old bird timers to prevent score carryover
+    // Clear old timers
     birds.forEach(b => clearTimeout(b.timer));
     birds = [];
+    clearInterval(scoreTimer);
+    clearTimeout(spawnTimer);
+    clearInterval(countdownInterval);
     
     // Hide screens
     titleScreen.classList.add('hidden');
     gameOverScreen.classList.add('hidden');
+    creditsScreen.classList.add('hidden');
     scoreDisplay.classList.remove('hidden');
+    countdownDisplay.classList.remove('hidden');
     
     // Clear world
     World.clear(world);
@@ -158,7 +167,7 @@ function startGame() {
     const startX = targetHandX || (width / 2);
     
     hand = Bodies.rectangle(startX, height - 100, handWidth, handHeight, { 
-        isStatic: true, // we will move it manually via Body.setPosition
+        isStatic: true, 
         friction: 1.0,
         render: { fillStyle: '#38bdf8' }
     });
@@ -180,17 +189,33 @@ function startGame() {
     runner = Runner.create();
     Runner.run(runner, engine);
     
-    // Setup Score and Spawner Timers
-    clearInterval(scoreTimer);
-    clearTimeout(spawnTimer);
-    scoreTimer = setInterval(() => {
-        if (isPlaying) {
-            score += 10; // base survival score
-            scoreValue.innerText = score;
+    // Start Countdown
+    let count = 3;
+    countdownDisplay.innerText = count;
+    
+    countdownInterval = setInterval(() => {
+        count--;
+        if (count > 0) {
+            countdownDisplay.innerText = count;
+        } else {
+            clearInterval(countdownInterval);
+            countdownDisplay.innerText = 'START!';
+            setTimeout(() => countdownDisplay.classList.add('hidden'), 500);
+            
+            isCountdown = false;
+            isPlaying = true;
+            
+            // Setup Score and Spawner Timers
+            scoreTimer = setInterval(() => {
+                if (isPlaying) {
+                    score += 10;
+                    scoreValue.innerText = score;
+                }
+            }, 1000);
+            
+            scheduleNextSpawn();
         }
     }, 1000);
-    
-    scheduleNextSpawn();
 }
 
 function scheduleNextSpawn() {
@@ -269,11 +294,14 @@ function spawnBirdByType(type) {
 }
 
 function gameOver() {
-    if (!isPlaying) return;
+    if (!isPlaying && !isCountdown) return;
     isPlaying = false;
+    isCountdown = false;
     currentScreen = 'gameover';
     clearInterval(scoreTimer);
     clearTimeout(spawnTimer);
+    clearInterval(countdownInterval);
+    countdownDisplay.classList.add('hidden');
     
     // Play Game Over Sound
     gameOverSound.currentTime = 0;
@@ -287,11 +315,20 @@ function gameOver() {
 }
 
 function updateGame() {
-    if (!isPlaying) return;
+    if (!isPlaying && !isCountdown) return;
     
     // Move hand towards targetX smoothly or instantly
     const moveX = targetHandX - hand.position.x;
     Body.setPosition(hand, { x: hand.position.x + moveX * 0.2, y: hand.position.y });
+    
+    if (isCountdown) {
+        // Lock stick upright on hand during countdown
+        Body.setPosition(stick, { x: hand.position.x, y: hand.position.y - 15 - 200 }); // handHeight/2(15) + stickHeight/2(200)
+        Body.setAngle(stick, 0);
+        Body.setVelocity(stick, {x:0, y:0});
+        Body.setAngularVelocity(stick, 0);
+        return;
+    }
     
     // Check if stick fell down
     if (stick.position.y > height + 200 || stick.position.x < -200 || stick.position.x > width + 200) {
@@ -335,7 +372,7 @@ function updateGame() {
                 bird.body = Bodies.circle(targetX, targetY, bird.config.radius, {
                     mass: bird.config.mass,
                     frictionAir: 0.05,
-                    collisionFilter: { group: -1 } // Don't collide with stick or hand
+                    collisionFilter: { category: 0x0002, mask: 0x0000 } // Don't collide physically, avoid explosion
                 });
                 
                 // Create constraint to attach to stick
