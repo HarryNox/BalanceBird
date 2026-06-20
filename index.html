@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>バランス・バード ～手と割り箸の協奏曲～</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Matter.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Custom Canvas will be added here -->
+        <canvas id="game-canvas"></canvas>
+        
+        <div id="ui-layer">
+            <div id="score-display" class="hidden">SCORE: <span id="score-value">0</span></div>
+            
+            <div id="title-screen" class="screen">
+                <h1>BALANCE BIRD</h1>
+                <p>手と割り箸の協奏曲</p>
+                <button id="start-btn">PLAY</button>
+            </div>
+            
+            <div id="game-over-screen" class="screen hidden">
+                <h2>GAME OVER</h2>
+                <p>FINAL SCORE: <span id="final-score">0</span></p>
+                <button id="retry-btn">RETRY</button>
+            </div>
+        </div>
+    </div>
+    <script src="main.js"></script>
+</body>
+</html>
