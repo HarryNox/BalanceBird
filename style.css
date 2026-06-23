@@ -120,15 +120,17 @@ body.mode-mobile #game-container {
     max-height: 100dvh;
     border-radius: 0;
 }
-body.mode-mobile .btn {
-    padding: 1.5rem 3rem;
-    font-size: 1.5rem;
+body.mode-mobile button {
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    max-width: 90vw;
+    white-space: nowrap;
 }
 body.mode-mobile h1 {
-    font-size: 60px;
+    font-size: 10vw;
 }
 body.mode-mobile #score-display {
-    font-size: 36px;
+    font-size: 28px;
 }
 button {
     padding: 15px 50px;
