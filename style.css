@@ -132,6 +132,9 @@ body.mode-mobile h1 {
 body.mode-mobile #score-display {
     font-size: 28px;
 }
+body.mode-mobile #countdown-display {
+    font-size: 20vw;
+}
 button {
     padding: 15px 50px;
     font-size: 22px;
