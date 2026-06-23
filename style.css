@@ -114,6 +114,22 @@ p {
     color: #94a3b8;
 }
 
+/* Mobile Mode Specific Styles */
+body.mode-mobile #game-container {
+    max-width: 100vw;
+    max-height: 100dvh;
+    border-radius: 0;
+}
+body.mode-mobile .btn {
+    padding: 1.5rem 3rem;
+    font-size: 1.5rem;
+}
+body.mode-mobile h1 {
+    font-size: 60px;
+}
+body.mode-mobile #score-display {
+    font-size: 36px;
+}
 button {
     padding: 15px 50px;
     font-size: 22px;

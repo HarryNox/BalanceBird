@@ -1,6 +1,10 @@
 const { Engine, Render, Runner, World, Bodies, Body, Composite, Events, Constraint } = Matter;
 
 // Game State
+const urlParams = new URLSearchParams(window.location.search);
+const mode = urlParams.get('mode') || 'pc';
+document.body.classList.add(`mode-${mode}`);
+
 let engine;
 let world;
 let runner;
@@ -122,11 +126,13 @@ function resize() {
 }
 
 function onMouseMove(e) {
+    if (mode === 'mobile') return;
     const rect = container.getBoundingClientRect();
     targetHandX = e.clientX - rect.left;
 }
 
 function onTouchMove(e) {
+    if (mode === 'pc') return;
     if (e.cancelable) e.preventDefault();
     const rect = container.getBoundingClientRect();
     targetHandX = e.touches[0].clientX - rect.left;
